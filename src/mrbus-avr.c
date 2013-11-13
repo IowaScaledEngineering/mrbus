@@ -178,7 +178,7 @@ void mrbusInit(void)
 
 uint8_t mrbusTxActive() 
 {
-	return(MRBUS_UART_SCR_B & _BV(MRBUS_TXEN)); 
+	return(MRBUS_UART_SCR_B & (_BV(MRBUS_UART_UDRIE) | _BV(MRBUS_TXCIE)));
 }
 
 uint8_t mrbusTransmit(void)
@@ -226,8 +226,8 @@ uint8_t mrbusTransmit(void)
 
 	_delay_ms(2);
 
-	/* Return if activity - we may have a packet to receive */
-	/* Application is responsible for waiting 10ms or for successful receive */
+	// Return if activity - we may have a packet to receive
+	// Application is responsible for waiting 10ms or for successful receive
 	if (mrbusActivity)
 	{
 		if (mrbusLoneliness)
@@ -250,7 +250,6 @@ uint8_t mrbusTransmit(void)
 		mrbusRxIndex = 0;
 	}
 
-
 	for (i = 0; i < 44; i++)
 	{
 		_delay_us(10);
@@ -263,7 +262,7 @@ uint8_t mrbusTransmit(void)
 		}
 	}
 
-	/* Now, wait calculated time from above */
+	// Now, wait calculated time from above
 	for (i = 0; i < status; i++)
 	{
 		_delay_us(10);
@@ -276,8 +275,8 @@ uint8_t mrbusTransmit(void)
 		}
 	}
 
-	/* Arbitration Sequence - 4800 bps */
-	/* Start Bit */
+	// Arbitration Sequence - 4800 bps
+	// Start Bit
 	if (mrbusArbBitSend(0))
 	{
 		if (mrbusLoneliness)
@@ -298,7 +297,7 @@ uint8_t mrbusTransmit(void)
 		}
 	}
 
-	/* Stop Bits */
+	// Stop Bits
 	if (mrbusArbBitSend(1))
 	{
 		if (mrbusLoneliness)
@@ -330,6 +329,8 @@ uint8_t mrbusTransmit(void)
 		// Enable transmit interrupt
 		MRBUS_UART_SCR_B |= _BV(MRBUS_UART_UDRIE);
 	}
+
+	mrbusPktQueueDrop(&mrbusTxQueue);
 
 	return(0);
 }

@@ -1,13 +1,14 @@
 /*************************************************************************
 Title:    MRBus Atmel AVR Header
 Authors:  Nathan Holmes <maverick@drgw.net>, Colorado, USA
-          Michael Petersen <railfan@drgw.net>, Colorado USA
+          Michael Petersen <railfan@drgw.net>, Colorado, USA
           Michael Prader, South Tyrol, Italy
+          Mark Finn <mark@mfinn.net>, Green Bay, WI, USA
 File:     mrbus-avr.h
 License:  GNU General Public License v3
 
 LICENSE:
-    Copyright (C) 2012 Nathan Holmes, Michael Petersen, and Michael Prader
+    Copyright (C) 2014 Nathan Holmes, Michael Petersen, and Michael Prader
 
     Original MRBus code developed by Nathan Holmes for PIC architecture.
     This file is based on AVR port by Michael Prader.  Updates and
@@ -33,6 +34,10 @@ LICENSE:
 
 #ifndef MRBUS_AVR_H
 #define MRBUS_AVR_H
+
+#ifndef MRBUS_WAIT_TYPE
+#define MRBUS_WAIT_TYPE 0
+#endif
 
 // AVR type-specific stuff
 // Define the UART port and registers used for XBee communication
@@ -70,8 +75,6 @@ LICENSE:
 #define MRBUS_TXCIE                TXCIE0
 #define MRBUS_TXC                  TXC0
 #define MRBUS_RX_ERR_MASK          (_BV(FE0) | _BV(DOR0))
-
-
 
 #elif  defined(__AVR_ATmega8__)
 

@@ -18,32 +18,81 @@ static uint8_t mrbusPriority;
 MRBusPktQueue mrbusRxQueue;
 MRBusPktQueue mrbusTxQueue;
 
+#if MRBUS_WAIT_TYPE == 0
+// MRBUS_WAIT_TYPE == 0 is the standard way, using delay loops
+#define mrbusWaitSetup()
+#define mrbusWait20uS(x) _delay_us(20*(x))
+
+#elif MRBUS_WAIT_TYPE == 1
+// MRBUS_WAIT_TYPE == 1 uses an application 50kHz clock
+extern volatile uint16_t ticks50kHz;
+uint16_t mrbusWaitTicks;
+
+void mrbusWaitSetup()
+{
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		mrbusWaitTicks=ticks50kHz;
+	}
+}
+
+void mrbusWait20uS(uint16_t waitUnits)
+{
+	uint16_t ticks50kHzCopy;
+
+	do
+	{
+		ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+		{
+			ticks50kHzCopy=ticks50kHz;
+		}	
+	} while ((int16_t)(ticks50kHzCopy-mrbusWaitTicks) < (waitUnits)); 
+
+	mrbusWaitTicks += waitUnits;
+}
+
+#elif MRBUS_WAIT_TYPE == 2
+// MRBUS_WAIT_TYPE == 2 uses TMR2 controlled by MRBus
+// FIXME:  Somebody should implement this
+
+#endif
+
 uint8_t mrbusArbBitSend(uint8_t bitval)
 {
 	uint8_t slice;
 	uint8_t tmp = 0;
 
+#if MRBUS_WAIT_TYPE == 0
 	cli();
-	if (bitval)
+#endif
+ 	if (bitval)
 		MRBUS_PORT &= ~_BV(MRBUS_TXE);
 	else
+	{
+		// 0 bits are the only ones that need absolute time, 
+		// as they're what cause framing errors to synchronize start of packet
+		mrbusWaitSetup();
 		MRBUS_PORT |= _BV(MRBUS_TXE);
-
+	}
+	
 	for (slice = 0; slice < 10; slice++)
 	{
 		if (slice > 2)
 		{
-			if (MRBUS_PIN & _BV(MRBUS_RX)) tmp = 1;
+			if (MRBUS_PIN & _BV(MRBUS_RX)) 
+				tmp = 1;
 			if (tmp ^ bitval)
 			{
 				MRBUS_PORT &= ~_BV(MRBUS_TXE);
 				MRBUS_DDR &= ~_BV(MRBUS_TX);
+#if MRBUS_WAIT_TYPE == 0
 				sei();
+#endif
 				return(1);
 			}
 
 		}
-		_delay_us(20);
+		mrbusWait20uS(1);//wait 20us
 	}
 	return(0);
 }
@@ -51,7 +100,6 @@ uint8_t mrbusArbBitSend(uint8_t bitval)
 
 ISR(MRBUS_UART_RX_INTERRUPT)
 {
-
 	//Receive Routine
 	mrbusActivity = MRBUS_ACTIVITY_RX;
 
@@ -139,7 +187,7 @@ void mrbusInit(void)
 	MRBUS_UART_SCR_C = _BV(URSEL) | _BV(UCSZ1) | _BV(UCSZ0);
 	
 #elif defined( MRBUS_ATMEGA_USART0_SIMPLE )
-    MRBUS_UART_UBRR = UBRR_VALUE;
+	MRBUS_UART_UBRR = UBRR_VALUE;
 	MRBUS_UART_SCR_A = (USE_2X)?_BV(U2X0):0;
 	MRBUS_UART_SCR_B = 0;
 	MRBUS_UART_SCR_C = _BV(URSEL0) | _BV(UCSZ01) | _BV(UCSZ00);
@@ -222,9 +270,10 @@ uint8_t mrbusTransmit(void)
 
 	/* Now go into critical timing loop */
 	/* Note that status is abused to calculate bus wait */
-	status = ((mrbusLoneliness + mrbusPriority) * 10) + (mrbusTxBuffer[MRBUS_PKT_SRC] & 0x0F);
+	status = ((mrbusLoneliness + mrbusPriority) * 5) + (mrbusTxBuffer[MRBUS_PKT_SRC] & 0x0F) + 22;
 
-	_delay_ms(2);
+	mrbusWaitSetup();
+	mrbusWait20uS(100); //wait 2ms
 
 	// Return if activity - we may have a packet to receive
 	// Application is responsible for waiting 10ms or for successful receive
@@ -250,22 +299,10 @@ uint8_t mrbusTransmit(void)
 		mrbusRxIndex = 0;
 	}
 
-	for (i = 0; i < 44; i++)
-	{
-		_delay_us(10);
-		if (0 == (MRBUS_PIN & _BV(MRBUS_RX)))
-		{
-			MRBUS_DDR &= ~_BV(MRBUS_TX);
-			if (mrbusLoneliness)
-				mrbusLoneliness--;
-			return(1);
-		}
-	}
-
 	// Now, wait calculated time from above
 	for (i = 0; i < status; i++)
 	{
-		_delay_us(10);
+		mrbusWait20uS(1); //wait 20us
 		if (0 == (MRBUS_PIN & _BV(MRBUS_RX)))
 		{
 			MRBUS_DDR &= ~_BV(MRBUS_TX);

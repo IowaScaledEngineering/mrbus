@@ -17,7 +17,7 @@
 static uint8_t mrbeeRxBuffer[MRBEE_UART_RX_BUFFER_SIZE];
 static volatile uint8_t mrbeeRxIndex=0;
 static volatile uint8_t mrbeeTxBuffer[MRBEE_UART_TX_BUFFER_SIZE];
-static volatile uint8_t mrbeeTxIndex=0, mrbeeTxEnd;
+static volatile uint8_t mrbeeTxIndex=0, mrbeeTxEnd=0;
 
 MRBusPktQueue mrbeeRxQueue;
 MRBusPktQueue mrbeeTxQueue;
@@ -128,7 +128,6 @@ ISR(MRBEE_UART_TX_INTERRUPT)
 		wdt_reset();
 	} while (MRBEE_PIN & _BV(MRBEE_CTS));  // Watchdog aware loop
 #endif
-
 	MRBEE_UART_DATA = mrbeeTxBuffer[mrbeeTxIndex++];  //  Get next byte and write to UART
 
 	if ( (mrbeeTxIndex >= mrbeeTxEnd) || (mrbeeTxIndex >= MRBEE_UART_TX_BUFFER_SIZE) )
@@ -144,9 +143,9 @@ void mrbusSetPriority(uint8_t priority)
 	return;
 }
 
-#ifndef MRBEE_BAUD
-#define MRBEE_BAUD 115200
-#endif
+//#ifndef MRBEE_BAUD
+#define MRBEE_BAUD 115000
+//#endif
 
 
 void mrbeeInit(void)
@@ -164,9 +163,6 @@ void mrbeeInit(void)
 #undef BAUD
 #define BAUD MRBEE_BAUD
 #include <util/setbaud.h>
-
-#define USE_2X 0
-#define UBRR_VALUE 8
 
 #if defined( MRBEE_AT90_UART )
 	// FIXME - probably need more stuff here
@@ -241,7 +237,8 @@ uint8_t mrbeeTransmit(void)
 	//  Return if bus already active.
 	if (mrbeeTxActive())
 		return(1);
-		
+
+	
 	memset(mrbeeTxUnescaped, 0, sizeof(mrbeeTxUnescaped));
 
 	mrbeeTxUnescaped[0] = 0x7E;     // 0 - Start 
@@ -267,7 +264,7 @@ uint8_t mrbeeTransmit(void)
 		mrbusPktQueueDrop(&mrbeeTxQueue);
 		return(0);
 	}
-		
+
 	// First Calculate CRC16
 	for (i=0; i<mrbusPktLen; i++)
 	{
@@ -283,13 +280,13 @@ uint8_t mrbeeTransmit(void)
 		xbeeChecksum += mrbeeTxUnescaped[i];
 
 	xbeeChecksum = 0xFF - xbeeChecksum;
-	mrbeeTxUnescaped[8 + mrbusPktLen + 1] = xbeeChecksum;
+	mrbeeTxUnescaped[8 + mrbusPktLen] = xbeeChecksum;
 
 	// Time to copy and escape
 	mrbeeTxEnd = 0;
 	memset(mrbeeTxBuffer, 0, sizeof(mrbeeTxBuffer));
 
-	mrbeeTxBuffer[mrbeeTxEnd++] = 0xFE; // Start of frame doesn't get escaped
+	mrbeeTxBuffer[mrbeeTxEnd++] = 0x7E; // Start of frame doesn't get escaped
 	for (i=1; i<(8 + mrbusPktLen + 1); i++)
 	{
 		switch(mrbeeTxUnescaped[i])

@@ -380,7 +380,7 @@ uint8_t mrbusIsBusIdle()
 uint8_t mrbusIsCrcValid(uint8_t* pktBuffer)
 {
 	uint8_t i;
-	uint16_t crc;
+	uint16_t crc = 0;
 	// CRC16 Test - is the packet intact?
 	for(i=0; i<pktBuffer[MRBUS_PKT_LEN]; i++)
 	{

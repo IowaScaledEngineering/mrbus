@@ -377,4 +377,19 @@ uint8_t mrbusIsBusIdle()
 	return(MRBUS_ACTIVITY_IDLE == mrbusActivity);
 }
 
+uint8_t mrbusIsCrcValid(uint8_t* pktBuffer)
+{
+	uint8_t i;
+	uint16_t crc;
+	// CRC16 Test - is the packet intact?
+	for(i=0; i<pktBuffer[MRBUS_PKT_LEN]; i++)
+	{
+		if ((i != MRBUS_PKT_CRC_H) && (i != MRBUS_PKT_CRC_L)) 
+			crc = mrbusCRC16Update(crc, pktBuffer[i]);
+	}
+	if ((UINT16_HIGH_BYTE(crc) != pktBuffer[MRBUS_PKT_CRC_H]) || (UINT16_LOW_BYTE(crc) != pktBuffer[MRBUS_PKT_CRC_L]))
+		return(0);
+
+	return (1);
+}
 

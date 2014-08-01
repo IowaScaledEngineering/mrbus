@@ -55,7 +55,7 @@ uint16_t mrbusCRC16Update(uint16_t crc, uint8_t a);
 void mrbeeInit(void);
 void mrbeeSetPriority(uint8_t priority);
 uint8_t mrbeeTxActive();
-uint8_t mrbusTransmit(void);
+uint8_t mrbeeTransmit(void);
 uint8_t mrbeeIsBusIdle();
 
 #ifdef __cplusplus

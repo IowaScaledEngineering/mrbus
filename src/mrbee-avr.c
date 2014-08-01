@@ -284,7 +284,7 @@ uint8_t mrbeeTransmit(void)
 
 	// Time to copy and escape
 	mrbeeTxEnd = 0;
-	memset(mrbeeTxBuffer, 0, sizeof(mrbeeTxBuffer));
+	memset((uint8_t*)mrbeeTxBuffer, 0, sizeof(mrbeeTxBuffer));
 
 	mrbeeTxBuffer[mrbeeTxEnd++] = 0x7E; // Start of frame doesn't get escaped
 	for (i=1; i<(8 + mrbusPktLen + 1); i++)

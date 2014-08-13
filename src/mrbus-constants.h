@@ -24,6 +24,13 @@
 #define MRBUS_EE_DEVICE_UPDATE_H     2
 #define MRBUS_EE_DEVICE_UPDATE_L     3
 
+// MRBus packet handling defines
+#define MRBUS_HANDLER_DONE           1
+#define MRBUS_HANDLER_EEPROM         2
+#define MRBUS_HANDLER_RESET          3
+#define MRBUS_HANDLER_VERSION        4
+#define MRBUS_HANDLER_CUSTOM         5
+
 // Version flags
 #define MRBUS_VERSION_WIRELESS 0x80
 #define MRBUS_VERSION_WIRED    0x00

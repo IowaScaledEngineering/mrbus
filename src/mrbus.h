@@ -58,6 +58,7 @@ uint8_t mrbusTxActive();
 uint8_t mrbusTransmit(void);
 uint8_t mrbusIsBusIdle();
 uint8_t mrbusIsCrcValid(uint8_t* pktBuffer);
+uint8_t mrbusPktHandler(uint8_t* rxBuffer, uint8_t* txBuffer, uint8_t mrbus_dev_addr);
 
 #ifdef __cplusplus
 }

@@ -40,7 +40,7 @@ LICENSE:
 #include "mrbus-avr.h"
 #endif
 
-// Global variable externs, so everybody can see the public mrbus variabes
+// Global variable externs, so everybody can see the public mrbus variables
 extern MRBusPktQueue mrbusRxQueue;
 extern MRBusPktQueue mrbusTxQueue;
 

@@ -125,10 +125,10 @@ LICENSE:
 #define MRBEE_DDR                  DDRD
 
 #ifndef MRBEE_CTS
-#define MRBEE_CTS                  5       /* PD3 */
+#define MRBEE_CTS                  5       /* PD5 */
 #endif
 #ifndef MRBEE_RTS
-#define MRBEE_RTS                  6       /* PD2 */
+#define MRBEE_RTS                  6       /* PD6 */
 #endif
 #ifndef MRBEE_TX
 #define MRBEE_TX                   1       /* PD1 */

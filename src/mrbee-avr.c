@@ -152,7 +152,10 @@ void mrbeeInit(void)
 {
 	MRBEE_DDR |= _BV(MRBEE_RTS);
 	MRBEE_PORT &= ~_BV(MRBEE_RTS);
-	MRBEE_DDR &= ~(_BV(MRBEE_RX) | _BV(MRBEE_TX) | _BV(MRBEE_CTS));
+	MRBEE_DDR &= ~(_BV(MRBEE_RX) | _BV(MRBEE_TX));
+#ifndef MRBEE_IGNORE_FLOW
+	MRBEE_DDR &= ~(_BV(MRBEE_CTS));
+#endif
 
 	mrbeeRxIndex = 0;
 	memset(mrbeeRxBuffer, 0, sizeof(mrbeeRxBuffer));

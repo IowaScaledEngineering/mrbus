@@ -151,6 +151,43 @@ LICENSE:
 #define MRBEE_TXC                 TXC0
 #define MRBEE_RX_ERR_MASK         (_BV(FE0) | _BV(DOR0))
 
+#elif defined(__AVR_ATmega164__) || defined(__AVR_ATmega324__) || \
+    defined(__AVR_ATmega644__) || defined(__AVR_ATmega1284__)
+
+#define MRBEE_ATMEGA_USART1
+#define MRBEE_UART_RX_INTERRUPT    USART1_RX_vect
+#define MRBEE_UART_TX_INTERRUPT    USART1_UDRE_vect
+#define MRBEE_PORT                 PORTD
+#define MRBEE_PIN                  PIND
+#define MRBEE_DDR                  DDRD
+
+#ifndef MRBEE_CTS
+#define MRBEE_CTS                  5       /* PD5 */
+#endif
+#ifndef MRBEE_RTS
+#define MRBEE_RTS                  6       /* PD6 */
+#endif
+#ifndef MRBEE_TX
+#define MRBEE_TX                   3       /* PD3 */
+#endif
+#ifndef MRBEE_RX
+#define MRBEE_RX                   2       /* PD2 */
+#endif
+
+
+#define MRBEE_UART_UBRR           UBRR1
+#define MRBEE_UART_SCR_A          UCSR1A
+#define MRBEE_UART_SCR_B          UCSR1B
+#define MRBEE_UART_SCR_C          UCSR1C
+#define MRBEE_UART_DATA           UDR1
+#define MRBEE_UART_UDRIE          UDRIE1
+#define MRBEE_RXEN                RXEN1
+#define MRBEE_TXEN                TXEN1
+#define MRBEE_RXCIE               RXCIE1
+#define MRBEE_TXCIE               TXCIE1
+#define MRBEE_TXC                 TXC1
+#define MRBEE_RX_ERR_MASK         (_BV(FE1) | _BV(DOR1))
+
 #elif defined(__AVR_ATtiny2313__) || defined(__AVR_ATtiny2313A__) || defined(__AVR_ATtiny4313__)
 
 #define MRBEE_ATTINY_USART

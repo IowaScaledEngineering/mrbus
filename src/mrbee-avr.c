@@ -113,6 +113,7 @@ ISR(MRBEE_UART_RX_INTERRUPT)
 				
 				}
 
+				rxFlags &= ~(RX_ISR_PROCESSING_PKT);
 				memset(mrbeeRxBuffer, 0, sizeof(mrbeeRxBuffer));
 				mrbeeRxIndex = 0;
 				rxFlags = 0;

@@ -57,6 +57,7 @@ void mrbeeSetPriority(uint8_t priority);
 uint8_t mrbeeTxActive();
 uint8_t mrbeeTransmit(void);
 uint8_t mrbeeIsBusIdle();
+uint8_t mrbeeGetRssi(void);
 
 #ifdef __cplusplus
 }

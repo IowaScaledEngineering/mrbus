@@ -19,6 +19,8 @@ static volatile uint8_t mrbeeRxIndex=0;
 static volatile uint8_t mrbeeTxBuffer[MRBEE_UART_TX_BUFFER_SIZE];
 static volatile uint8_t mrbeeTxIndex=0, mrbeeTxEnd=0;
 
+static volatile uint8_t mrbeeRssi = 255;
+
 MRBusPktQueue mrbeeRxQueue;
 MRBusPktQueue mrbeeTxQueue;
 
@@ -106,6 +108,7 @@ ISR(MRBEE_UART_RX_INTERRUPT)
 						case 0x81: // 16 bit addressing frame
 							// 0xFF is a passing checksum, load packet into mrbeeRxQueue
 							mrbusPktQueuePush(&mrbeeRxQueue, mrbeeRxBuffer + mrbeeRxIndex, min(mrbeeRxBuffer[mrbeeRxIndex + MRBUS_PKT_LEN], MRBUS_BUFFER_SIZE));
+							mrbeeRssi = mrbeeRxBuffer[mrbeeRxIndex-2];
 							break;
 
 						// All other cases ignored - these are packet types from the XBee we don't understand	
@@ -151,6 +154,8 @@ void mrbusSetPriority(uint8_t priority)
 
 void mrbeeInit(void)
 {
+	mrbeeRssi = 255;
+	
 	MRBEE_DDR |= _BV(MRBEE_RTS);
 	MRBEE_PORT &= ~_BV(MRBEE_RTS);
 	MRBEE_DDR &= ~(_BV(MRBEE_RX) | _BV(MRBEE_TX));
@@ -322,4 +327,8 @@ uint8_t mrbeeIsBusIdle()
 	return(1);
 }
 
+uint8_t mrbeeGetRssi(void)
+{
+	return mrbeeRssi;
+}
 

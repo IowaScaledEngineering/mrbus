@@ -48,7 +48,7 @@ uint8_t mrbeePktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen, uint
 	pktPtr = (uint8_t*)q->pktBufferArray[q->headIdx].pkt;
 	memcpy(pktPtr, data, dataLen);
 	memset(pktPtr+dataLen, 0, MRBUS_BUFFER_SIZE - dataLen);
-	q->pktBufferArray[q->headIdx].rssi = 
+	q->pktBufferArray[q->headIdx].rssi = rssi;
 
 	if( ++q->headIdx >= q->pktBufferArraySz )
 		q->headIdx = 0;

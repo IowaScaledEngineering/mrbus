@@ -107,7 +107,7 @@ ISR(MRBEE_UART_RX_INTERRUPT)
 							// Intentional fall-through
 						case 0x81: // 16 bit addressing frame
 							// 0xFF is a passing checksum, load packet into mrbeeRxQueue
-							mrbusPktQueuePush(&mrbeeRxQueue, mrbeeRxBuffer + mrbeeRxIndex, min(mrbeeRxBuffer[mrbeeRxIndex + MRBUS_PKT_LEN], MRBUS_BUFFER_SIZE));
+							mrbeePktQueuePush(&mrbeeRxQueue, mrbeeRxBuffer + mrbeeRxIndex, min(mrbeeRxBuffer[mrbeeRxIndex + MRBUS_PKT_LEN], MRBUS_BUFFER_SIZE), mrbeeRxBuffer[mrbeeRxIndex-2]);
 							mrbeeRssi = mrbeeRxBuffer[mrbeeRxIndex-2];
 							break;
 

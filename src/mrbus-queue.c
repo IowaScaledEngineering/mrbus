@@ -37,7 +37,7 @@ uint8_t mrbusPktQueueDepth(MRBusPktQueue* q)
 	return(result);
 }
 
-uint8_t mrbusPktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen)
+uint8_t mrbeePktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen, uint8_t rssi)
 {
 	uint8_t* pktPtr;
 	// If full, bail with a false
@@ -48,6 +48,7 @@ uint8_t mrbusPktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen)
 	pktPtr = (uint8_t*)q->pktBufferArray[q->headIdx].pkt;
 	memcpy(pktPtr, data, dataLen);
 	memset(pktPtr+dataLen, 0, MRBUS_BUFFER_SIZE - dataLen);
+	q->pktBufferArray[q->headIdx].rssi = 
 
 	if( ++q->headIdx >= q->pktBufferArraySz )
 		q->headIdx = 0;
@@ -59,13 +60,24 @@ uint8_t mrbusPktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen)
 	return(1);
 }
 
-uint8_t mrbusPktQueuePopInternal(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen, uint8_t snoop)
+uint8_t mrbusPktQueuePush(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen)
+{
+	return mrbeePktQueuePush(q, data, dataLen, 0);
+}
+
+
+uint8_t mrbeePktQueuePopInternal(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen, uint8_t snoop, uint8_t* rssiPtr)
 {
 	memset(data, 0, dataLen);
+	if (NULL != rssiPtr)
+		*rssiPtr = 0;
+
 	if (0 == mrbusPktQueueDepth(q))
 		return(0);
 
 	memcpy(data, (uint8_t*)&(q->pktBufferArray[q->tailIdx].pkt), min(dataLen, q->pktBufferArray[q->tailIdx].pkt[MRBUS_PKT_LEN]));
+	if (NULL != rssiPtr)
+		*rssiPtr = q->pktBufferArray[q->tailIdx].rssi;
 
 	// Snoop indicates that we shouldn't actually pop the packet off - just copy it out
 	if (snoop)
@@ -79,6 +91,11 @@ uint8_t mrbusPktQueuePopInternal(MRBusPktQueue* q, uint8_t* data, uint8_t dataLe
 	}
 
 	return(1);
+}
+
+uint8_t mrbusPktQueuePopInternal(MRBusPktQueue* q, uint8_t* data, uint8_t dataLen, uint8_t snoop)
+{
+	return mrbeePktQueuePopInternal(q, data, dataLen, snoop, NULL);
 }
 
 uint8_t mrbusPktQueueDrop(MRBusPktQueue* q)
